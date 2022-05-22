@@ -7,6 +7,7 @@ import com.enablebanking.jwtapi.service.MyUserDetailsService;
 import com.enablebanking.jwtapi.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,11 +35,13 @@ public class AuthController {
      * @return
      */
     @GetMapping("/jwt")
-    public ResponseEntity<JwtInfoResponse> jwtInfo() {
-        final JwtInfoResponse jwtInfo = JwtInfoResponse.builder()
-                .jwt(null)
-                .build();
-        return ResponseEntity.ok(jwtInfo);
+    public ResponseEntity<JwtInfoResponse> jwtInfo(HttpServletRequest request, HttpServletResponse response) {
+        String authHeader = request.getHeader("Authorization");
+        String jwt = jwtService.getJwtFromHeader(authHeader);
+        if (jwt == null) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+        }
+        return ResponseEntity.ok(jwtService.getClaims(jwt));
     }
 
     @PostMapping("/auth")

@@ -1,32 +1,37 @@
-# Read Me First
-The following was discovered as part of building this project:
+### Run application
 
-* The original package name 'com.enablebanking.jwt-api' is invalid and this project uses 'com.enablebanking.jwtapi' instead.
+```shell
+export MY_PRIVATE_KEY={PRIVATE_KEY_AS_A_RAW_STRING}
+export MY_CERT={CERT_AS_A_RAW_STRING}
+./gradlew bootRun
+```
 
-# Getting Started
+### Generate private key and certificate as a raw string
 
-### Reference Documentation
-For further reference, please consider the following sections:
+*private key*
 
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.7.0/gradle-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.7.0/gradle-plugin/reference/html/#build-image)
-* [Spring Configuration Processor](https://docs.spring.io/spring-boot/docs/2.7.0/reference/htmlsingle/#configuration-metadata-annotation-processor)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/2.7.0/reference/htmlsingle/#boot-features-developing-web-applications)
-* [Spring Security](https://docs.spring.io/spring-boot/docs/2.7.0/reference/htmlsingle/#boot-features-security)
+```shell
+openssl genrsa -out private.key 4096
+cat private.key | grep -v 'KEY' | tr -d '\n'
+```
 
-### Guides
-The following guides illustrate how to use some features concretely:
+*certificate*
 
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
-* [Securing a Web Application](https://spring.io/guides/gs/securing-web/)
-* [Spring Boot and OAuth2](https://spring.io/guides/tutorials/spring-boot-oauth2/)
-* [Authenticating a User with LDAP](https://spring.io/guides/gs/authenticating-ldap/)
+```shell
+openssl req -new -x509 -days 365 -key private.key -out public.crt -subj "/C=FI/ST=Uusimaa/L=Helsinki/O=BigOrganisation/CN=bigorg.com"
+cat public.crt | grep -v 'CERTIFICATE' | tr -d '\n'
+```
 
-### Additional Links
-These additional references should also help you:
+### Authentication
 
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
+```shell
+curl -i -v -XPOST http://localhost:8080/auth -H 'Content-Type: application/json' -d '{"login": "foo", "password": "foo"}'
+```
 
+### Request resources
+
+Copy the jwt token that you received in the response from `/auth` and use it in `Authorization` header to request other resources, e.g:
+
+```shell
+curl -i -v -XGET http://localhost:8080/jwt -H 'Authorization: Bearer {JWT_TOKEN}'
+```
