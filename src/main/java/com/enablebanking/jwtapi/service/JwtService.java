@@ -27,7 +27,6 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtService {
-    private final static String AUTH_HEADER = "Authorization";
     private final static String AUTH_TYPE = "Bearer";
     private static final int JWT_START_POSITION = AUTH_TYPE.length() + 1;
     private final static int JWT_EXPIRATION_MS = 1000 * 60 * 60 * 10;
