@@ -1,6 +1,6 @@
 package com.enablebanking.jwtapi.controller;
 
-import com.enablebanking.jwtapi.service.MyUserDetailsService;
+import com.enablebanking.jwtapi.service.UserDetailsService;
 import com.enablebanking.jwtapi.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +24,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private static final int JWT_START_POSITION = AUTH_TYPE.length() + 1;
 
     private final JwtService jwtService;
-    private final MyUserDetailsService myUserDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -37,7 +37,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if (name != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.myUserDetailsService.loadUserByUsername(name);
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(name);
             if (jwtService.validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()

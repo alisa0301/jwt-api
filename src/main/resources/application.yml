@@ -1,3 +1,6 @@
 jwt:
   private-key: ${MY_PRIVATE_KEY}
   cert: ${MY_CERT}
+user:
+  login: ${MY_LOGIN:foo}
+  password: ${MY_PASSWORD:foo}

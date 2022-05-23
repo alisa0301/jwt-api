@@ -1,7 +1,7 @@
 package com.enablebanking.jwtapi.config;
 
 import com.enablebanking.jwtapi.controller.JwtRequestFilter;
-import com.enablebanking.jwtapi.service.MyUserDetailsService;
+import com.enablebanking.jwtapi.service.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,12 +18,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
-    private final MyUserDetailsService myUserDetailsService;
+    private final UserDetailsService userDetailsService;
     private final JwtRequestFilter jwtRequestFilter;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(myUserDetailsService);
+        auth.userDetailsService(userDetailsService);
     }
 
     @Override

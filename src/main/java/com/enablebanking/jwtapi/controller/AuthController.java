@@ -3,8 +3,8 @@ package com.enablebanking.jwtapi.controller;
 import com.enablebanking.jwtapi.dto.AuthRequest;
 import com.enablebanking.jwtapi.dto.AuthResponse;
 import com.enablebanking.jwtapi.dto.JwtInfoResponse;
-import com.enablebanking.jwtapi.service.MyUserDetailsService;
 import com.enablebanking.jwtapi.service.JwtService;
+import com.enablebanking.jwtapi.service.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,11 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,16 +23,19 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final MyUserDetailsService myUserDetailsService;
+    private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
     /**
      * Restricted resource. Should be requested with a JWT token.
+     *
      * @return
      */
     @GetMapping("/jwt")
-    public ResponseEntity<JwtInfoResponse> jwtInfo(HttpServletRequest request, HttpServletResponse response) {
-        String authHeader = request.getHeader("Authorization");
+    public ResponseEntity<JwtInfoResponse> jwtInfo(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletResponse response
+    ) {
         String jwt = jwtService.getJwtFromHeader(authHeader);
         if (jwt == null) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
@@ -46,8 +45,11 @@ public class AuthController {
 
     @PostMapping("/auth")
     public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest authRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getLogin(), authRequest.getPassword()));
-        UserDetails userDetails = myUserDetailsService.loadUserByUsername(authRequest.getLogin());
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                authRequest.getLogin(), authRequest.getPassword()
+        );
+        authenticationManager.authenticate(authToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getLogin());
         String token = jwtService.generateToken(userDetails);
         return ResponseEntity.ok(new AuthResponse(token));
     }

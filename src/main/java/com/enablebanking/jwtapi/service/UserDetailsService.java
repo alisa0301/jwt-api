@@ -1,20 +1,21 @@
 package com.enablebanking.jwtapi.service;
 
+import com.enablebanking.jwtapi.config.UserCredentialsConfig;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service
-public class MyUserDetailsService implements UserDetailsService {
-    private static final String USER = "foo";
-    private static final String PASSWORD = "foo";
+@RequiredArgsConstructor
+public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+    private final UserCredentialsConfig userCredentialsConfig;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new User(USER, PASSWORD, new ArrayList<>());
+        return new User(userCredentialsConfig.getLogin(), userCredentialsConfig.getPassword(), new ArrayList<>());
     }
 }
